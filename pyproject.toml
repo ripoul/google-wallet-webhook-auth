@@ -1,0 +1,71 @@
+[project]
+name = "google_wallet_webhook_auth"
+version = "0.1.0"
+authors = [
+  { name="Jules LE BRIS", email="jls.lebris@gmail.com" },
+]
+description = "Google Wallet webhook signature verification utilities for Python."
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+license = "GPL-3.0-or-later"
+license-files = ["LICEN[CS]E*"]
+dependencies = [
+    "cryptography>=46.0",
+    "requests"
+]
+
+[project.urls]
+Homepage = "https://github.com/ripoul/google-wallet-webhook-auth"
+Issues = "https://github.com/ripoul/google-wallet-webhook-auth/issues"
+
+
+[project.optional-dependencies]
+dev = [
+    "mypy>=1.19.0",
+    "pre-commit>=4.5.0",
+    "pytest>=9.0.2",
+    "pytest-cov>=7.0.0",
+    "ruff>=0.14.9",
+    "types-requests>=2.32.4.20250913",
+]
+
+[build-system]
+requires = ["uv_build >= 0.9.11, <0.10.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-root = ""
+
+[tool.mypy]
+# Enforce strict checks
+strict = true
+
+# Paths to ignore
+exclude = "^(tests/|conftest\\.py$)"
+files = "google_wallet_webhook_auth"
+
+follow_imports = "silent"
+ignore_missing_imports = true
+
+# Treat untyped functions as errors
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+
+# Other settings
+check_untyped_defs = true
+show_column_numbers = true
+show_error_codes = true
+warn_no_return = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_unreachable = true
+pretty = true
+
+[tool.mypy-checker]
+# Optional: Define specific type-checker behavior
+warn_missing_annotations = true
