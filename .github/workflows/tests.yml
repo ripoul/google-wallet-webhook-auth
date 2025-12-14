@@ -1,9 +1,9 @@
-name: Code Quality Assurance
+name: Run Tests
 on:
   push:
 
 jobs:
-  fmt:
+  tests:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code

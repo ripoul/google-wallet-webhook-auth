@@ -30,7 +30,7 @@ app = Flask(__name__)
 def event_webhook():
     data = request.get_json()
     try:
-        Validator("monissuergoogle").validate(data)
+        Validator("YOUR_ISSUER_ID").validate(data)
     except SignatureVerificationError:
         abort(401)
 

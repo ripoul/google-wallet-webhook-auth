@@ -46,6 +46,7 @@ strict = true
 
 # Paths to ignore
 exclude = "^(tests/|conftest\\.py$)"
+files = "google_wallet_webhook_auth"
 
 follow_imports = "silent"
 ignore_missing_imports = true

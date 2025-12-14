@@ -20,5 +20,5 @@ jobs:
       - name: Run mypy
         id: run_mypy
         run: |
-          mypy --config-file pyproject.toml src
+          uv run mypy --config-file pyproject.toml
     
