@@ -38,6 +38,33 @@ if __name__ == '__main__':
     app.run(debug=True)
 ```
 
+## Usage with cache and django
+
+```python
+from rest_framework import permissions
+from django.core.cache import cache
+
+from google_wallet_webhook_auth import Validator
+from google_wallet_webhook_auth.exceptions import SignatureVerificationError
+from google_wallet_webhook_auth.cache import CacheConfig, CacheInterface
+
+class DjangoCacheAdapter(CacheInterface):
+    def get(self, key):
+        return cache.get(key)
+
+    def set(self, key, value, timeout=None):
+        cache.set(key, value, timeout=timeout)
+
+class IsGoogleWebhook(permissions.BasePermission):
+    def has_permission(self, request, __view):
+        cache_config = CacheConfig(key="google_key", backend=DjangoCacheAdapter())
+        try:
+            Validator("YOUR_ISSUER_ID", cache_config=cache_config).validate(request.data)
+        except SignatureVerificationError:
+            return False
+        return True
+```
+
 ## Development
 
 - Install deps: `uv sync --all-extras`

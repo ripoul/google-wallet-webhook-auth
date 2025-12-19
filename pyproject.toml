@@ -1,6 +1,6 @@
 [project]
 name = "google_wallet_webhook_auth"
-version = "0.1.0"
+version = "1.0.0"
 authors = [
   { name="Jules LE BRIS", email="jls.lebris@gmail.com" },
 ]
