@@ -9,15 +9,24 @@ from cryptography.hazmat.primitives.asymmetric import ec
 
 from .exceptions import SignatureVerificationError
 from .crypto import construct_signed_data, load_public_key
+from .cache import CacheConfig
 
 
 class Validator:
     issuer_id: str
+    cache_config: CacheConfig | None
 
-    def __init__(self, issuer_id: str) -> None:
+    def __init__(self, issuer_id: str, cache_config: CacheConfig | None = None) -> None:
         self.issuer_id = issuer_id
+        self.cache_config = cache_config
 
     def _get_google_key(self) -> list[dict[str, Any]]:
+        if self.cache_config and (
+            cached_keys := self.cache_config.backend.get(self.cache_config.key)
+        ):
+            if isinstance(cached_keys, list):
+                return cached_keys
+
         try:
             google_keys = requests.get(
                 "https://pay.google.com/gp/m/issuer/keys", timeout=3
@@ -29,6 +38,8 @@ class Validator:
 
         keys = google_keys["keys"]
         assert isinstance(keys, list)
+        if self.cache_config:
+            self.cache_config.backend.set(self.cache_config.key, keys, timeout=86400)
         return keys
 
     def _verify_intermediate_signing_key(self, data: dict[str, Any]) -> None:

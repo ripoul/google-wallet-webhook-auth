@@ -1,5 +1,6 @@
 from google_wallet_webhook_auth import Validator
 from google_wallet_webhook_auth.exceptions import SignatureVerificationError
+from google_wallet_webhook_auth.cache import CacheConfig
 import base64
 from cryptography.exceptions import InvalidSignature
 from unittest.mock import MagicMock, patch
@@ -131,3 +132,46 @@ def test_verify_signature_keyerror():
     )
     with pytest.raises(SignatureVerificationError):
         validator.validate({"dummy": "value"})
+
+
+def test_get_google_key_with_cache_hit():
+    mock_cache = MagicMock()
+    mock_cache.get.return_value = [{"keyValue": "cached_key"}]
+    validator = Validator(
+        "issuer_id", cache_config=CacheConfig(key="google_keys", backend=mock_cache)
+    )
+    keys = validator._get_google_key()
+    assert keys == [{"keyValue": "cached_key"}]
+    mock_cache.get.assert_called_once_with("google_keys")
+
+
+@patch("google_wallet_webhook_auth.validator.requests.get")
+def test_get_google_key_with_cache_miss(mock_get):
+    mock_get.return_value.json.return_value = {"keys": [{"keyValue": "dummy"}]}
+    mock_cache = MagicMock()
+    mock_cache.get.return_value = None
+    validator = Validator(
+        "issuer_id", cache_config=CacheConfig(key="google_keys", backend=mock_cache)
+    )
+    keys = validator._get_google_key()
+    assert keys == [{"keyValue": "dummy"}]
+    mock_cache.get.assert_called_once_with("google_keys")
+    mock_cache.set.assert_called_once_with(
+        "google_keys", [{"keyValue": "dummy"}], timeout=86400
+    )
+
+
+@patch("google_wallet_webhook_auth.validator.requests.get")
+def test_get_google_key_with_cache_hit_wrong_format(mock_get):
+    mock_get.return_value.json.return_value = {"keys": [{"keyValue": "dummy"}]}
+    mock_cache = MagicMock()
+    mock_cache.get.return_value = "blabla"  # Not a list
+    validator = Validator(
+        "issuer_id", cache_config=CacheConfig(key="google_keys", backend=mock_cache)
+    )
+    keys = validator._get_google_key()
+    assert keys == [{"keyValue": "dummy"}]
+    mock_cache.get.assert_called_once_with("google_keys")
+    mock_cache.set.assert_called_once_with(
+        "google_keys", [{"keyValue": "dummy"}], timeout=86400
+    )
